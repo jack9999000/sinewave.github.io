@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>駐波模擬（多模式）</title>
+  <title>駐波模擬（滑桿控制模式）</title>
   <style>
     body { background-color:#111; color:#eee; text-align:center; margin:0; overflow:hidden; font-family:sans-serif; }
     h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h2>駐波模擬（多模式）</h2>
+  <h2>駐波模擬（滑桿控制模式）</h2>
   <div class="controls">
     <label>振幅 A: <span id="ampVal" class="value">30</span> px</label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
@@ -65,12 +65,20 @@
       lambdaVal.textContent = lambda_cm.toFixed(2);
       speedVal.textContent = speed;
       modeVal.textContent = mode;
+
+      // 重建軌跡陣列，避免舊模式混亂
+      trail.length = 0;
+      const L = width - 2*wallWidth;
+      const len = Math.floor(L/dx);
+      for(let i=0;i<len;i++) trail.push([]);
     }
 
     [ampSlider, lambdaSlider, speedSlider, modeSlider].forEach(slider => slider.addEventListener('input', updateParams));
 
     const L = width - 2*wallWidth;
-    const trail = new Array(Math.floor(L/dx)).fill(0).map(()=>[]);
+    const trail = [];
+    updateParams(); // 初始化軌跡
+
     const maxTrailLength = 150;
 
     function draw() {
@@ -114,7 +122,7 @@
       ctx.beginPath();
       for(let i=0;i<yValues.length;i++){
         const x = wallWidth + i*dx;
-        ctx.lineTo(x, height/2 - yValues[i]);
+        ctx.lineTo(x,height/2 - yValues[i]);
       }
       ctx.strokeStyle='#00ffff';
       ctx.lineWidth=2;
