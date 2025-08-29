@@ -96,8 +96,8 @@
     <label>波長 λ: <span id="lambdaVal" class="value">100</span></label>
     <input type="range" id="lambdaSlider" class="slider" min="50" max="300" value="100">
 
-    <label>播放速度: <span id="speedVal" class="value">0.05</span></label>
-    <input type="range" id="speedSlider" class="slider" min="0.01" max="0.2" step="0.01" value="0.05">
+    <label>播放速度: <span id="speedVal" class="value">0.15</span></label>
+    <input type="range" id="speedSlider" class="slider" min="0.01" max="0.5" step="0.01" value="0.15">
   </div>
 
   <canvas id="waveCanvas" width="900" height="400"></canvas>
@@ -111,7 +111,7 @@
     let time = 0;
     let A = 80;
     let lambda = 100;
-    let speed = 0.05;
+    let speed = 0.15; // 預設快很多
     const dx = 2;
 
     const ampSlider = document.getElementById('ampSlider');
