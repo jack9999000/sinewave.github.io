@@ -88,11 +88,11 @@
 <body>
   <h2>駐波模擬</h2>
   <div class="controls">
-    <label>振幅 A: <span id="ampVal" class="value">80</span> px</label>
-    <input type="range" id="ampSlider" class="slider" min="10" max="150" value="80">
+    <label>振幅 A: <span id="ampVal" class="value">30</span> px</label>
+    <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
 
-    <label>波長 λ: <span id="lambdaVal" class="value">1.00</span> cm</label>
-    <input type="range" id="lambdaSlider" class="slider" min="0.1" max="10" step="0.01" value="1">
+    <label>波長 λ: <span id="lambdaVal" class="value">5.00</span> cm</label>
+    <input type="range" id="lambdaSlider" class="slider" min="1" max="10" step="0.01" value="5">
 
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
     <input type="range" id="speedSlider" class="slider" min="1" max="10" step="1" value="5">
@@ -107,8 +107,8 @@
     const height = canvas.height;
 
     let time = 0;
-    let A = 80;
-    let lambda_cm = 1;
+    let A = 30;
+    let lambda_cm = 5;
     let lambda = lambda_cm / 100;
     let speed = 5;
     let v = 50 * speed;
@@ -138,9 +138,7 @@
       slider.addEventListener('input', updateParams);
     });
 
-    // 每個 x 的軌跡陣列
     const trail = new Array(Math.floor(width / dx)).fill(0).map(() => []);
-
     const maxTrailLength = 150;
 
     function draw() {
@@ -159,7 +157,7 @@
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // 計算當前波
+      // 計算主波
       const yValues = [];
       for (let x = 0; x < width; x += dx) {
         const y = A * Math.sin(k * x - w * time) + A * Math.sin(k * x + w * time);
@@ -172,7 +170,7 @@
         if (trail[i].length > maxTrailLength) trail[i].shift();
       }
 
-      // 畫軌跡
+      // 畫各點軌跡
       for (let i = 0; i < trail.length; i++) {
         ctx.beginPath();
         for (let t = 0; t < trail[i].length; t++) {
@@ -189,7 +187,7 @@
       // 畫主波
       ctx.beginPath();
       for (let x = 0; x < width; x += dx) {
-        ctx.lineTo(x, height / 2 - yValues[x/dx]);
+        ctx.lineTo(x, height / 2 - yValues[x / dx]);
       }
       ctx.strokeStyle = '#00ffff';
       ctx.lineWidth = 2;
