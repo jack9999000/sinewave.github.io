@@ -2,12 +2,12 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>駐波實驗 - 右牆固定振幅0</title>
+  <title>駐波實驗</title>
   <style>
     body { background-color:#111; color:#eee; text-align:center; margin:0; overflow:hidden; font-family:sans-serif; }
-    h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; }
+    h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; position:fixed; top:10px; left:50%; transform:translateX(-50%); }
     canvas { display:block; margin:0 auto; background-color:#222; box-shadow:0 0 15px #000; border-radius:8px; }
-    .controls { position:absolute; top:20px; left:20px; background-color:rgba(0,0,0,0.7); padding:15px; border-radius:12px; box-shadow:0 0 12px #000; text-align:left; width:250px; }
+    .controls { position:absolute; top:50px; left:20px; background-color:rgba(0,0,0,0.7); padding:15px; border-radius:12px; box-shadow:0 0 12px #000; text-align:left; width:250px; }
     .controls label { display:flex; justify-content:space-between; margin-top:12px; font-size:14px; }
     .slider { -webkit-appearance:none; appearance:none; width:180px; height:6px; border-radius:4px; background:linear-gradient(90deg,#00ffff,#0077ff); outline:none; cursor:pointer; margin-top:4px; transition:background 0.3s; }
     .slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%; background:#fff; border:2px solid #00ffff; box-shadow:0 0 10px #00ffff; cursor:grab; transition:transform 0.2s; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h2>駐波實驗 - 右牆固定振幅0</h2>
+  <h2>駐波實驗</h2>
   <div class="controls">
     <label>振幅 A: <span id="ampVal" class="value">30</span></label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
@@ -50,7 +50,7 @@
 
     const L = width - 2*wallWidth;
     const trail = [];
-    const maxTrailLength = 150;
+    const maxTrailLength = 200;
 
     ampSlider.addEventListener('input', updateParams);
     speedSlider.addEventListener('input', updateParams);
@@ -78,7 +78,9 @@
     updateParams();
 
     function draw() {
-      ctx.clearRect(0,0,width,height);
+      // 在畫布上加半透明黑色來淡化舊軌跡
+      ctx.fillStyle = "rgba(34,34,34,0.3)";
+      ctx.fillRect(0,0,width,height);
 
       // 畫牆
       ctx.fillStyle='#555';
@@ -100,20 +102,21 @@
         if(trail[i].length>maxTrailLength) trail[i].shift();
       }
 
-      // 畫軌跡（漸淡）
+      // 畫軌跡（用 globalAlpha 漸淡）
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#ff00ff';
+      ctx.beginPath();
       for(let i=0;i<trail.length;i++){
-        ctx.beginPath();
         for(let j=0;j<trail[i].length;j++){
           const x = wallWidth + i*dx;
           const y = height/2 - trail[i][j];
           if(j===0) ctx.moveTo(x,y);
           else ctx.lineTo(x,y);
         }
-        // 透明度漸淡，越舊越透明
-        ctx.strokeStyle = `rgba(255,0,255,${0.2 + 0.8*(j/trail[i].length)})`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
       }
+      ctx.globalAlpha = 0.3;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
 
       // 畫主波
       ctx.beginPath();
@@ -125,7 +128,7 @@
       ctx.lineWidth=2;
       ctx.stroke();
 
-      // 畫理論駐波節點
+      // 畫駐波節點
       if(mode > 0){
         const step = L/mode;
         ctx.strokeStyle='rgba(255,255,0,0.5)';
@@ -139,7 +142,7 @@
         }
       }
 
-      time += 0.15; // 更快播放速度
+      time += 0.15;
       requestAnimationFrame(draw);
     }
 
