@@ -2,90 +2,33 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>駐波模擬（固定端）</title>
+  <title>駐波模擬（多模式）</title>
   <style>
-    body {
-      background-color: #111;
-      color: #eee;
-      text-align: center;
-      margin: 0;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
-    h2 {
-      margin-top: 10px;
-      font-weight: 600;
-      color: #00ffff;
-      text-shadow: 0 0 10px #0ff;
-    }
-    canvas {
-      display: block;
-      margin: 0 auto;
-      background-color: #222;
-      box-shadow: 0 0 15px #000;
-      border-radius: 8px;
-    }
-    .controls {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px #000;
-      text-align: left;
-      width: 260px;
-    }
-    .controls label {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-    .slider {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 4px;
-      background: linear-gradient(90deg, #00ffff, #0077ff);
-      outline: none;
-      cursor: pointer;
-      margin-top: 4px;
-      transition: background 0.3s;
-    }
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      border: 2px solid #00ffff;
-      box-shadow: 0 0 10px #00ffff;
-      cursor: grab;
-      transition: transform 0.2s;
-    }
-    .slider::-webkit-slider-thumb:active {
-      transform: scale(1.2);
-      cursor: grabbing;
-    }
-    .value {
-      font-weight: bold;
-      color: #0ff;
-      margin-left: 5px;
-    }
+    body { background-color:#111; color:#eee; text-align:center; margin:0; overflow:hidden; font-family:sans-serif; }
+    h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; }
+    canvas { display:block; margin:0 auto; background-color:#222; box-shadow:0 0 15px #000; border-radius:8px; }
+    .controls { position:absolute; top:20px; left:20px; background-color:rgba(0,0,0,0.7); padding:15px; border-radius:12px; box-shadow:0 0 12px #000; text-align:left; width:280px; }
+    .controls label { display:flex; justify-content:space-between; margin-top:12px; font-size:14px; }
+    .slider { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:4px; background:linear-gradient(90deg,#00ffff,#0077ff); outline:none; cursor:pointer; margin-top:4px; transition:background 0.3s; }
+    .slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%; background:#fff; border:2px solid #00ffff; box-shadow:0 0 10px #00ffff; cursor:grab; transition:transform 0.2s; }
+    .slider::-webkit-slider-thumb:active { transform:scale(1.2); cursor:grabbing; }
+    .value { font-weight:bold; color:#0ff; margin-left:5px; }
   </style>
 </head>
 <body>
-  <h2>駐波模擬（固定端）</h2>
+  <h2>駐波模擬（多模式）</h2>
   <div class="controls">
     <label>振幅 A: <span id="ampVal" class="value">30</span> px</label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
+
     <label>波長 λ: <span id="lambdaVal" class="value">5.00</span> cm</label>
     <input type="range" id="lambdaSlider" class="slider" min="1" max="10" step="0.01" value="5">
+
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
     <input type="range" id="speedSlider" class="slider" min="1" max="10" step="1" value="5">
+
+    <label>模式 n: <span id="modeVal" class="value">1</span></label>
+    <input type="range" id="modeSlider" class="slider" min="1" max="5" step="1" value="1">
   </div>
 
   <canvas id="waveCanvas" width="900" height="400"></canvas>
@@ -97,92 +40,87 @@
     const height = canvas.height;
 
     let time = 0;
-    let A = 30;
-    let lambda_cm = 5;
-    let lambda = lambda_cm / 100;
-    let speed = 5;
-    let v = 50 * speed;
-    const dx = 2;
-    const wallWidth = 10; // 左右牆寬
+    let A = 30, lambda_cm = 5, lambda = lambda_cm/100, speed = 5, v = 50*speed, mode = 1;
+    const dx = 2, wallWidth = 10;
 
     const ampSlider = document.getElementById('ampSlider');
     const lambdaSlider = document.getElementById('lambdaSlider');
     const speedSlider = document.getElementById('speedSlider');
+    const modeSlider = document.getElementById('modeSlider');
 
     const ampVal = document.getElementById('ampVal');
     const lambdaVal = document.getElementById('lambdaVal');
     const speedVal = document.getElementById('speedVal');
+    const modeVal = document.getElementById('modeVal');
 
     function updateParams() {
       A = parseFloat(ampSlider.value);
       lambda_cm = parseFloat(lambdaSlider.value);
-      lambda = lambda_cm / 100;
+      lambda = lambda_cm/100;
       speed = parseFloat(speedSlider.value);
-      v = 50 * speed;
+      v = 50*speed;
+      mode = parseInt(modeSlider.value);
 
       ampVal.textContent = A;
       lambdaVal.textContent = lambda_cm.toFixed(2);
       speedVal.textContent = speed;
+      modeVal.textContent = mode;
     }
 
-    [ampSlider, lambdaSlider, speedSlider].forEach(slider => {
-      slider.addEventListener('input', updateParams);
-    });
+    [ampSlider, lambdaSlider, speedSlider, modeSlider].forEach(slider => slider.addEventListener('input', updateParams));
 
-    const waveLengthPx = () => width - 2*wallWidth; // 波長對應畫布範圍
-    const trail = new Array(Math.floor((width - 2*wallWidth)/dx)).fill(0).map(() => []);
+    const L = width - 2*wallWidth;
+    const trail = new Array(Math.floor(L/dx)).fill(0).map(()=>[]);
     const maxTrailLength = 150;
 
     function draw() {
       ctx.clearRect(0,0,width,height);
 
-      // 畫牆面
-      ctx.fillStyle = '#555';
+      // 畫牆
+      ctx.fillStyle='#555';
       ctx.fillRect(0,0,wallWidth,height);
       ctx.fillRect(width-wallWidth,0,wallWidth,height);
 
       // 計算駐波
-      const L = width - 2*wallWidth;
-      const k = Math.PI / L; // n=1
+      const k = mode * Math.PI / L;
       const w = v * k;
-
       const yValues = [];
-      for (let x = 0; x < L; x += dx) {
-        const y = A * Math.sin(k * x) * Math.cos(w * time);
+      for(let x=0;x<L;x+=dx){
+        const y = A * Math.sin(k*x) * Math.cos(w*time);
         yValues.push(y);
       }
 
       // 更新軌跡
-      for (let i = 0; i < yValues.length; i++) {
+      for(let i=0;i<yValues.length;i++){
         trail[i].push(yValues[i]);
-        if (trail[i].length > maxTrailLength) trail[i].shift();
+        if(trail[i].length>maxTrailLength) trail[i].shift();
       }
 
       // 畫軌跡
-      for (let i = 0; i < trail.length; i++) {
+      for(let i=0;i<trail.length;i++){
         ctx.beginPath();
-        for (let t = 0; t < trail[i].length; t++) {
+        for(let t=0;t<trail[i].length;t++){
           const x = wallWidth + i*dx;
           const y = height/2 - trail[i][t];
-          if (t===0) ctx.moveTo(x,y);
+          if(t===0) ctx.moveTo(x,y);
           else ctx.lineTo(x,y);
         }
-        ctx.strokeStyle = 'rgba(255,0,255,0.2)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle='rgba(255,0,255,0.2)';
+        ctx.lineWidth=1;
         ctx.stroke();
       }
 
       // 畫主波
       ctx.beginPath();
-      for (let i = 0; i < yValues.length; i++) {
+      for(let i=0;i<yValues.length;i++){
         const x = wallWidth + i*dx;
         ctx.lineTo(x, height/2 - yValues[i]);
       }
-      ctx.strokeStyle = '#00ffff';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle='#00ffff';
+      ctx.lineWidth=2;
       ctx.stroke();
 
-      time += 0.02;
+      time+=0.02;
       requestAnimationFrame(draw);
     }
 
