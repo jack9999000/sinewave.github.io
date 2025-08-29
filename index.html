@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>駐波模擬</title>
+  <style>
+    body {
+      background-color: #111;
+      color: #eee;
+      text-align: center;
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background-color: #222;
+    }
+  </style>
+</head>
+<body>
+  <h2>駐波模擬</h2>
+  <canvas id="waveCanvas" width="900" height="400"></canvas>
+
+  <script>
+    const canvas = document.getElementById('waveCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const width = canvas.width;
+    const height = canvas.height;
+
+    let time = 0;
+    const A = 80; // 振幅
+    const k = 2 * Math.PI / 100; // 波數
+    const w = 2 * Math.PI / 100; // 角頻率
+    const dx = 2;
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.beginPath();
+      ctx.moveTo(0, height / 2);
+
+      for (let x = 0; x < width; x += dx) {
+        const y = A * Math.sin(k * x - w * time) + A * Math.sin(k * x + w * time); // 合成波 = 正向波 + 反向波
+        ctx.lineTo(x, height / 2 - y);
+      }
+
+      ctx.strokeStyle = '#00ffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      time += 0.05;
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
