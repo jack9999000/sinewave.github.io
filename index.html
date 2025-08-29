@@ -7,12 +7,13 @@
     body { background-color:#111; color:#eee; text-align:center; margin:0; overflow:hidden; font-family:sans-serif; }
     h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; }
     canvas { display:block; margin:0 auto; background-color:#222; box-shadow:0 0 15px #000; border-radius:8px; }
-    .controls { position:absolute; top:20px; left:20px; background-color:rgba(0,0,0,0.7); padding:15px; border-radius:12px; box-shadow:0 0 12px #000; text-align:left; width:220px; }
+    .controls { position:absolute; top:20px; left:20px; background-color:rgba(0,0,0,0.7); padding:15px; border-radius:12px; box-shadow:0 0 12px #000; text-align:left; width:250px; }
     .controls label { display:flex; justify-content:space-between; margin-top:12px; font-size:14px; }
     .slider { -webkit-appearance:none; appearance:none; width:180px; height:6px; border-radius:4px; background:linear-gradient(90deg,#00ffff,#0077ff); outline:none; cursor:pointer; margin-top:4px; transition:background 0.3s; }
     .slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%; background:#fff; border:2px solid #00ffff; box-shadow:0 0 10px #00ffff; cursor:grab; transition:transform 0.2s; }
     .slider::-webkit-slider-thumb:active { transform:scale(1.2); cursor:grabbing; }
     .value { font-weight:bold; color:#0ff; margin-left:5px; }
+    .hint { font-size:12px; color:#0ff; margin-top:4px; text-align:right; }
   </style>
 </head>
 <body>
@@ -23,6 +24,7 @@
 
     <label>波長 λ: <span id="lambdaVal" class="value">50</span></label>
     <input type="range" id="lambdaSlider" class="slider" min="10" max="100" step="1" value="50">
+    <div id="modeHint" class="hint"></div>
 
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
     <input type="range" id="speedSlider" class="slider" min="1" max="10" step="1" value="5">
@@ -46,6 +48,7 @@
     const lambdaSlider = document.getElementById('lambdaSlider');
     const speedSlider = document.getElementById('speedSlider');
     const modeVal = document.getElementById('modeVal');
+    const modeHint = document.getElementById('modeHint');
 
     const ampVal = document.getElementById('ampVal');
     const lambdaValEl = document.getElementById('lambdaVal');
@@ -72,8 +75,13 @@
       const nExact = 2*L / lambda;
       if(Math.abs(nExact - Math.round(nExact)) < 1e-6) {
         mode = Math.round(nExact);
+        modeHint.textContent = "完整駐波";
       } else {
         mode = 0;
+        // 顯示最近完整駐波模式提示
+        const nearestN = Math.round(nExact);
+        const nearestLambda = 2*L / nearestN;
+        modeHint.textContent = "最近完整駐波模式 n=" + nearestN + " (λ≈" + (nearestLambda/10).toFixed(1) + ")";
       }
 
       ampVal.textContent = A;
