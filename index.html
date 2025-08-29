@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>駐波實驗</title>
+  <title>駐波實驗 - 右牆固定振幅0</title>
   <style>
     body { background-color:#111; color:#eee; text-align:center; margin:0; overflow:hidden; font-family:sans-serif; }
     h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h2>駐波實驗</h2>
+  <h2>駐波實驗 - 右牆固定振幅0</h2>
   <div class="controls">
     <label>振幅 A: <span id="ampVal" class="value">30</span></label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
@@ -79,9 +79,9 @@
       v = 50*speed;
       mode = parseInt(modeSlider.value);
 
-      // 自動調整波長，使駐波個數正好對應 mode
+      // 自動調整波長，使右牆振幅固定為0
       if(!lambdaSlider.dragging){
-        lambda = (2 * L) / mode;
+        lambda = 2 * L / mode;       // 波長 = 2L / n
         lambda_val = lambda / 10;
       } else {
         lambda_val = parseFloat(lambdaSlider.value);
@@ -106,13 +106,13 @@
       ctx.fillRect(0,0,wallWidth,height);
       ctx.fillRect(width-wallWidth,0,wallWidth,height);
 
-      const k = 2 * Math.PI / lambda;
+      const k = Math.PI * mode / L; // 波數，右牆固定節點
       const w = v * k;
 
       const yValues = [];
       for(let x=0;x<L;x+=dx){
-        // 任意波長波型 + 左右牆反射
-        const y = A * Math.sin(k*x - w*time) + A * Math.sin(k*(2*L - x) - w*time);
+        // 駐波公式，右牆振幅固定為0
+        const y = 2*A * Math.sin(k*x) * Math.cos(w*time);
         yValues.push(y);
       }
 
