@@ -28,7 +28,6 @@
       border-radius: 8px;
     }
 
-    /* 控制面板 */
     .controls {
       position: absolute;
       top: 20px;
@@ -48,7 +47,6 @@
       font-size: 14px;
     }
 
-    /* 自訂滑桿 */
     .slider {
       -webkit-appearance: none;
       appearance: none;
@@ -113,7 +111,7 @@
     let lambda_cm = 1; // cm
     let lambda = lambda_cm / 100; // 轉換為 m
     let speed = 5; // 播放速度
-    let v = 100 * speed; // 波速 = 100 * 播放速度
+    let v = 50 * speed; // 波速 = 50 * 播放速度
     const dx = 2;
 
     // 控制元件
@@ -131,7 +129,7 @@
       lambda_cm = parseFloat(lambdaSlider.value);
       lambda = lambda_cm / 100; // 轉換為 m
       speed = parseFloat(speedSlider.value);
-      v = 100 * speed; // 波速 = 100 * 播放速度
+      v = 50 * speed; // 波速 = 50 * 播放速度
 
       ampVal.textContent = A;
       lambdaVal.textContent = lambda_cm.toFixed(2);
@@ -144,7 +142,7 @@
 
     // 軌跡資料
     const trail = [];
-    const maxTrailLength = 200; // 最多保留 200 個時間點
+    const maxTrailLength = 200;
 
     function draw() {
       ctx.clearRect(0, 0, width, height);
@@ -152,7 +150,7 @@
       const k = 2 * Math.PI / (lambda * 100); // 單位：rad/px
       const w = v * k; // ω = v * k
 
-      // 背景駐波 (靜態)
+      // 背景駐波
       ctx.beginPath();
       for (let x = 0; x < width; x += dx) {
         const y = A * Math.cos(k * x);
@@ -172,7 +170,7 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // 記錄中央點的軌跡 (x=450)
+      // 記錄中央點軌跡 (x = width/2)
       const centerX = Math.floor(width / 2);
       const centerY = A * Math.sin(k * centerX - w * time) + A * Math.sin(k * centerX + w * time);
       trail.push(centerY);
