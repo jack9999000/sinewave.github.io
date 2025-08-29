@@ -107,14 +107,13 @@
     const height = canvas.height;
 
     let time = 0;
-    let A = 80; // px
-    let lambda_cm = 1; // cm
-    let lambda = lambda_cm / 100; // 轉換為 m
-    let speed = 5; // 播放速度
-    let v = 50 * speed; // 波速 = 50 * 播放速度
+    let A = 80;
+    let lambda_cm = 1;
+    let lambda = lambda_cm / 100;
+    let speed = 5;
+    let v = 50 * speed;
     const dx = 2;
 
-    // 控制元件
     const ampSlider = document.getElementById('ampSlider');
     const lambdaSlider = document.getElementById('lambdaSlider');
     const speedSlider = document.getElementById('speedSlider');
@@ -123,13 +122,12 @@
     const lambdaVal = document.getElementById('lambdaVal');
     const speedVal = document.getElementById('speedVal');
 
-    // 更新參數
     function updateParams() {
       A = parseFloat(ampSlider.value);
       lambda_cm = parseFloat(lambdaSlider.value);
-      lambda = lambda_cm / 100; // 轉換為 m
+      lambda = lambda_cm / 100;
       speed = parseFloat(speedSlider.value);
-      v = 50 * speed; // 波速 = 50 * 播放速度
+      v = 50 * speed;
 
       ampVal.textContent = A;
       lambdaVal.textContent = lambda_cm.toFixed(2);
@@ -140,15 +138,16 @@
       slider.addEventListener('input', updateParams);
     });
 
-    // 軌跡資料
-    const trail = [];
-    const maxTrailLength = 200;
+    // 每個 x 的軌跡陣列
+    const trail = new Array(Math.floor(width / dx)).fill(0).map(() => []);
+
+    const maxTrailLength = 150;
 
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      const k = 2 * Math.PI / (lambda * 100); // 單位：rad/px
-      const w = v * k; // ω = v * k
+      const k = 2 * Math.PI / (lambda * 100);
+      const w = v * k;
 
       // 背景駐波
       ctx.beginPath();
@@ -160,31 +159,39 @@
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // 動畫波
-      ctx.beginPath();
+      // 計算當前波
+      const yValues = [];
       for (let x = 0; x < width; x += dx) {
         const y = A * Math.sin(k * x - w * time) + A * Math.sin(k * x + w * time);
-        ctx.lineTo(x, height / 2 - y);
+        yValues.push(y);
       }
-      ctx.strokeStyle = '#00ffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
 
-      // 記錄中央點軌跡 (x = width/2)
-      const centerX = Math.floor(width / 2);
-      const centerY = A * Math.sin(k * centerX - w * time) + A * Math.sin(k * centerX + w * time);
-      trail.push(centerY);
-      if (trail.length > maxTrailLength) trail.shift();
+      // 更新軌跡
+      for (let i = 0; i < yValues.length; i++) {
+        trail[i].push(yValues[i]);
+        if (trail[i].length > maxTrailLength) trail[i].shift();
+      }
 
       // 畫軌跡
-      ctx.beginPath();
       for (let i = 0; i < trail.length; i++) {
-        const x = width - maxTrailLength + i;
-        const y = height / 2 - trail[i];
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        ctx.beginPath();
+        for (let t = 0; t < trail[i].length; t++) {
+          const x = i * dx;
+          const y = height / 2 - trail[i][t];
+          if (t === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'rgba(255, 0, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
       }
-      ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)';
+
+      // 畫主波
+      ctx.beginPath();
+      for (let x = 0; x < width; x += dx) {
+        ctx.lineTo(x, height / 2 - yValues[x/dx]);
+      }
+      ctx.strokeStyle = '#00ffff';
       ctx.lineWidth = 2;
       ctx.stroke();
 
