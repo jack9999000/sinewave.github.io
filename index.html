@@ -38,7 +38,7 @@
       border-radius: 12px;
       box-shadow: 0 0 12px #000;
       text-align: left;
-      width: 240px;
+      width: 260px;
     }
 
     .controls label {
@@ -90,11 +90,11 @@
 <body>
   <h2>駐波模擬</h2>
   <div class="controls">
-    <label>振幅 A: <span id="ampVal" class="value">80</span></label>
+    <label>振幅 A: <span id="ampVal" class="value">80</span> px</label>
     <input type="range" id="ampSlider" class="slider" min="10" max="150" value="80">
 
-    <label>波長 λ: <span id="lambdaVal" class="value">100</span></label>
-    <input type="range" id="lambdaSlider" class="slider" min="50" max="300" value="100">
+    <label>波長 λ: <span id="lambdaVal" class="value">1.00</span> cm</label>
+    <input type="range" id="lambdaSlider" class="slider" min="0.1" max="10" step="0.01" value="1">
 
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
     <input type="range" id="speedSlider" class="slider" min="1" max="10" step="1" value="5">
@@ -111,10 +111,11 @@
     const height = canvas.height;
 
     let time = 0;
-    let A = 80;
-    let lambda = 100;
-    let speed = 5; // 播放速度 (1~10)
-    let v = 100 * speed; // 波速 = 100 * speed
+    let A = 80; // px
+    let lambda_cm = 1; // cm
+    let lambda = lambda_cm / 100; // 轉換為 m
+    let speed = 5; // 播放速度
+    let v = 100 * speed; // 波速 = 100 * 播放速度
     const dx = 2;
 
     // 取得控制元件
@@ -130,12 +131,13 @@
     // 更新參數
     function updateParams() {
       A = parseFloat(ampSlider.value);
-      lambda = parseFloat(lambdaSlider.value);
+      lambda_cm = parseFloat(lambdaSlider.value);
+      lambda = lambda_cm / 100; // 轉換為 m
       speed = parseFloat(speedSlider.value);
       v = 100 * speed; // 波速 = 100 * 播放速度
 
       ampVal.textContent = A;
-      lambdaVal.textContent = lambda;
+      lambdaVal.textContent = lambda_cm.toFixed(2);
       speedVal.textContent = speed;
       velocityVal.textContent = v;
     }
@@ -147,8 +149,8 @@
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      const k = 2 * Math.PI / lambda;   // 波數
-      const w = v * k; // 角頻率 = 波速 * 波數
+      const k = 2 * Math.PI / (lambda * 100); // k 單位：rad/px (假設 1m = 100px)
+      const w = v * k; // ω = v * k
 
       // 背景駐波
       ctx.beginPath();
@@ -170,7 +172,7 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      time += 0.02; // 固定時間步進，快慢由 v 控制
+      time += 0.02;
       requestAnimationFrame(draw);
     }
 
