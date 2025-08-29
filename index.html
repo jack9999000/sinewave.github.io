@@ -38,7 +38,7 @@
       border-radius: 12px;
       box-shadow: 0 0 12px #000;
       text-align: left;
-      width: 220px;
+      width: 240px;
     }
 
     .controls label {
@@ -98,6 +98,8 @@
 
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
     <input type="range" id="speedSlider" class="slider" min="1" max="10" step="1" value="5">
+
+    <label>波速 v: <span id="velocityVal" class="value">500</span> m/s</label>
   </div>
 
   <canvas id="waveCanvas" width="900" height="400"></canvas>
@@ -111,9 +113,11 @@
     let time = 0;
     let A = 80;
     let lambda = 100;
-    let speed = 5; // 預設中等速度
+    let speed = 5; // 播放速度 (1~10)
+    let v = 100 * speed; // 波速 = 100 * speed
     const dx = 2;
 
+    // 取得控制元件
     const ampSlider = document.getElementById('ampSlider');
     const lambdaSlider = document.getElementById('lambdaSlider');
     const speedSlider = document.getElementById('speedSlider');
@@ -121,15 +125,19 @@
     const ampVal = document.getElementById('ampVal');
     const lambdaVal = document.getElementById('lambdaVal');
     const speedVal = document.getElementById('speedVal');
+    const velocityVal = document.getElementById('velocityVal');
 
+    // 更新參數
     function updateParams() {
       A = parseFloat(ampSlider.value);
       lambda = parseFloat(lambdaSlider.value);
       speed = parseFloat(speedSlider.value);
+      v = 100 * speed; // 波速 = 100 * 播放速度
 
       ampVal.textContent = A;
       lambdaVal.textContent = lambda;
       speedVal.textContent = speed;
+      velocityVal.textContent = v;
     }
 
     [ampSlider, lambdaSlider, speedSlider].forEach(slider => {
@@ -139,8 +147,8 @@
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      const k = 2 * Math.PI / lambda; // 波數
-      const w = k; // 假設波速 v=1，所以 ω = v*k = k
+      const k = 2 * Math.PI / lambda;   // 波數
+      const w = v * k; // 角頻率 = 波速 * 波數
 
       // 背景駐波
       ctx.beginPath();
@@ -152,7 +160,7 @@
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // 主動畫
+      // 動畫波
       ctx.beginPath();
       for (let x = 0; x < width; x += dx) {
         const y = A * Math.sin(k * x - w * time) + A * Math.sin(k * x + w * time);
@@ -162,7 +170,7 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      time += speed * 0.05; // 速度調整倍數，預設 5 比原本快 5 倍
+      time += 0.02; // 固定時間步進，快慢由 v 控制
       requestAnimationFrame(draw);
     }
 
