@@ -103,14 +103,14 @@
       // 畫軌跡（漸淡）
       for(let i=0;i<trail.length;i++){
         ctx.beginPath();
-        for(let t=0;t<trail[i].length;t++){
+        for(let j=0;j<trail[i].length;j++){
           const x = wallWidth + i*dx;
-          const y = height/2 - trail[i][t];
-          if(t===0) ctx.moveTo(x,y);
+          const y = height/2 - trail[i][j];
+          if(j===0) ctx.moveTo(x,y);
           else ctx.lineTo(x,y);
         }
-        // 透明度漸淡
-        ctx.strokeStyle = `rgba(255,0,255,${0.2 * (t/trail[i].length)})`;
+        // 透明度漸淡，越舊越透明
+        ctx.strokeStyle = `rgba(255,0,255,${0.2 + 0.8*(j/trail[i].length)})`;
         ctx.lineWidth = 1;
         ctx.stroke();
       }
@@ -139,7 +139,7 @@
         }
       }
 
-      time += 0.1; // 加快播放速度
+      time += 0.15; // 更快播放速度
       requestAnimationFrame(draw);
     }
 
