@@ -21,11 +21,8 @@
     <label>振幅 A: <span id="ampVal" class="value">30</span></label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
 
-    <label>波長 λ: <span id="lambdaVal" class="value">50</span></label>
-    <input type="range" id="lambdaSlider" class="slider" min="10" max="100" step="1" value="50">
-
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
-    <input type="range" id="speedSlider" class="slider" min="1" max="10" step="1" value="5">
+    <input type="range" id="speedSlider" class="slider" min="1" max="20" step="1" value="10">
 
     <label>駐波個數 n: <span id="modeVal" class="value">1</span></label>
     <input type="range" id="modeSlider" class="slider" min="1" max="10" step="1" value="1">
@@ -40,28 +37,20 @@
     const height = canvas.height;
 
     let time = 0;
-    let A = 30, lambda_val = 50, lambda = lambda_val*10, speed = 5, v = 50*speed, mode = 1;
+    let A = 30, speed = 10, v = 50*speed, mode = 1;
     const dx = 2, wallWidth = 10;
 
     const ampSlider = document.getElementById('ampSlider');
-    const lambdaSlider = document.getElementById('lambdaSlider');
     const speedSlider = document.getElementById('speedSlider');
     const modeSlider = document.getElementById('modeSlider');
 
     const ampVal = document.getElementById('ampVal');
-    const lambdaValEl = document.getElementById('lambdaVal');
     const speedVal = document.getElementById('speedVal');
     const modeVal = document.getElementById('modeVal');
 
     const L = width - 2*wallWidth;
     const trail = [];
     const maxTrailLength = 150;
-
-    // 記錄波長滑桿是否被拖動
-    lambdaSlider.dragging = false;
-    lambdaSlider.addEventListener('mousedown', ()=>lambdaSlider.dragging=true);
-    lambdaSlider.addEventListener('mouseup', ()=>lambdaSlider.dragging=false);
-    lambdaSlider.addEventListener('input', updateParams);
 
     ampSlider.addEventListener('input', updateParams);
     speedSlider.addEventListener('input', updateParams);
@@ -79,17 +68,7 @@
       v = 50*speed;
       mode = parseInt(modeSlider.value);
 
-      // 自動調整波長，使右牆振幅固定為0
-      if(!lambdaSlider.dragging){
-        lambda = 2 * L / mode;       // 波長 = 2L / n
-        lambda_val = lambda / 10;
-      } else {
-        lambda_val = parseFloat(lambdaSlider.value);
-        lambda = lambda_val*10;
-      }
-
       ampVal.textContent = A;
-      lambdaValEl.textContent = lambda_val.toFixed(0);
       speedVal.textContent = speed;
       modeVal.textContent = mode;
 
@@ -111,7 +90,6 @@
 
       const yValues = [];
       for(let x=0;x<L;x+=dx){
-        // 駐波公式，右牆振幅固定為0
         const y = 2*A * Math.sin(k*x) * Math.cos(w*time);
         yValues.push(y);
       }
@@ -160,7 +138,7 @@
         }
       }
 
-      time += 0.02;
+      time += 0.05; // 時間增量加快播放速度
       requestAnimationFrame(draw);
     }
 
