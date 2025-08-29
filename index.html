@@ -96,9 +96,6 @@
     <label>波長 λ: <span id="lambdaVal" class="value">100</span></label>
     <input type="range" id="lambdaSlider" class="slider" min="50" max="300" value="100">
 
-    <label>角頻率 ω: <span id="omegaVal" class="value">100</span></label>
-    <input type="range" id="omegaSlider" class="slider" min="20" max="300" value="100">
-
     <label>播放速度: <span id="speedVal" class="value">0.05</span></label>
     <input type="range" id="speedSlider" class="slider" min="0.01" max="0.2" step="0.01" value="0.05">
   </div>
@@ -114,43 +111,38 @@
     let time = 0;
     let A = 80;
     let lambda = 100;
-    let omega = 100;
     let speed = 0.05;
     const dx = 2;
 
     const ampSlider = document.getElementById('ampSlider');
     const lambdaSlider = document.getElementById('lambdaSlider');
-    const omegaSlider = document.getElementById('omegaSlider');
     const speedSlider = document.getElementById('speedSlider');
 
     const ampVal = document.getElementById('ampVal');
     const lambdaVal = document.getElementById('lambdaVal');
-    const omegaVal = document.getElementById('omegaVal');
     const speedVal = document.getElementById('speedVal');
 
     function updateParams() {
       A = parseFloat(ampSlider.value);
       lambda = parseFloat(lambdaSlider.value);
-      omega = parseFloat(omegaSlider.value);
       speed = parseFloat(speedSlider.value);
 
       ampVal.textContent = A;
       lambdaVal.textContent = lambda;
-      omegaVal.textContent = omega;
       speedVal.textContent = speed.toFixed(2);
     }
 
-    [ampSlider, lambdaSlider, omegaSlider, speedSlider].forEach(slider => {
+    [ampSlider, lambdaSlider, speedSlider].forEach(slider => {
       slider.addEventListener('input', updateParams);
     });
 
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      const k = 2 * Math.PI / lambda;
-      const w = 2 * Math.PI / omega;
+      const k = 2 * Math.PI / lambda;   // 波數
+      const w = k;  // 角頻率 = k，假設波速 v=1
 
-      // 淡淡的背景駐波
+      // 背景駐波
       ctx.beginPath();
       for (let x = 0; x < width; x += dx) {
         const y = A * Math.cos(k * x);
