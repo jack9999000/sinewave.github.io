@@ -21,8 +21,8 @@
     <label>振幅 A: <span id="ampVal" class="value">30</span></label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
 
-    <label>播放速度: <span id="speedVal" class="value">5</span></label>
-    <input type="range" id="speedSlider" class="slider" min="1" max="20" step="1" value="10">
+    <label>播放速度: <span id="speedVal" class="value">15</span></label>
+    <input type="range" id="speedSlider" class="slider" min="1" max="30" step="1" value="15">
 
     <label>駐波個數 n: <span id="modeVal" class="value">1</span></label>
     <input type="range" id="modeSlider" class="slider" min="1" max="10" step="1" value="1">
@@ -37,7 +37,7 @@
     const height = canvas.height;
 
     let time = 0;
-    let A = 30, speed = 10, v = 50*speed, mode = 1;
+    let A = 30, speed = 15, v = 50*speed, mode = 1;
     const dx = 2, wallWidth = 10;
 
     const ampSlider = document.getElementById('ampSlider');
@@ -85,7 +85,7 @@
       ctx.fillRect(0,0,wallWidth,height);
       ctx.fillRect(width-wallWidth,0,wallWidth,height);
 
-      const k = Math.PI * mode / L; // 波數，右牆固定節點
+      const k = Math.PI * mode / L;
       const w = v * k;
 
       const yValues = [];
@@ -100,7 +100,7 @@
         if(trail[i].length>maxTrailLength) trail[i].shift();
       }
 
-      // 畫軌跡
+      // 畫軌跡（漸淡）
       for(let i=0;i<trail.length;i++){
         ctx.beginPath();
         for(let t=0;t<trail[i].length;t++){
@@ -109,8 +109,9 @@
           if(t===0) ctx.moveTo(x,y);
           else ctx.lineTo(x,y);
         }
-        ctx.strokeStyle='rgba(255,0,255,0.2)';
-        ctx.lineWidth=1;
+        // 透明度漸淡
+        ctx.strokeStyle = `rgba(255,0,255,${0.2 * (t/trail[i].length)})`;
+        ctx.lineWidth = 1;
         ctx.stroke();
       }
 
@@ -138,7 +139,7 @@
         }
       }
 
-      time += 0.05; // 時間增量加快播放速度
+      time += 0.1; // 加快播放速度
       requestAnimationFrame(draw);
     }
 
