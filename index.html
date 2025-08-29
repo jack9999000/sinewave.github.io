@@ -57,6 +57,16 @@
     const trail = [];
     const maxTrailLength = 150;
 
+    // 記錄波長滑桿是否被拖動
+    lambdaSlider.dragging = false;
+    lambdaSlider.addEventListener('mousedown', ()=>lambdaSlider.dragging=true);
+    lambdaSlider.addEventListener('mouseup', ()=>lambdaSlider.dragging=false);
+    lambdaSlider.addEventListener('input', updateParams);
+
+    ampSlider.addEventListener('input', updateParams);
+    speedSlider.addEventListener('input', updateParams);
+    modeSlider.addEventListener('input', updateParams);
+
     function rebuildTrail() {
       trail.length = 0;
       const len = Math.floor(L/dx);
@@ -65,11 +75,18 @@
 
     function updateParams() {
       A = parseFloat(ampSlider.value);
-      lambda_val = parseFloat(lambdaSlider.value);
-      lambda = lambda_val*10;
       speed = parseFloat(speedSlider.value);
       v = 50*speed;
       mode = parseInt(modeSlider.value);
+
+      // 自動調整波長，使駐波個數正好對應 mode
+      if(!lambdaSlider.dragging){
+        lambda = (2 * L) / mode;
+        lambda_val = lambda / 10;
+      } else {
+        lambda_val = parseFloat(lambdaSlider.value);
+        lambda = lambda_val*10;
+      }
 
       ampVal.textContent = A;
       lambdaValEl.textContent = lambda_val.toFixed(0);
@@ -78,11 +95,6 @@
 
       rebuildTrail();
     }
-
-    ampSlider.addEventListener('input',updateParams);
-    lambdaSlider.addEventListener('input',updateParams);
-    speedSlider.addEventListener('input',updateParams);
-    modeSlider.addEventListener('input',updateParams);
 
     updateParams();
 
@@ -134,7 +146,7 @@
       ctx.lineWidth=2;
       ctx.stroke();
 
-      // 畫理論駐波節點（由 modeSlider 控制）
+      // 畫理論駐波節點
       if(mode > 0){
         const step = L/mode;
         ctx.strokeStyle='rgba(255,255,0,0.5)';
