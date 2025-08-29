@@ -138,6 +138,7 @@
       slider.addEventListener('input', updateParams);
     });
 
+    // 每個 x 的軌跡
     const trail = new Array(Math.floor(width / dx)).fill(0).map(() => []);
     const maxTrailLength = 150;
 
@@ -147,9 +148,15 @@
       const k = 2 * Math.PI / (lambda * 100);
       const w = v * k;
 
+      // 畫牆面
+      const wallWidth = 10;
+      ctx.fillStyle = '#555';
+      ctx.fillRect(0, 0, wallWidth, height); // 左牆
+      ctx.fillRect(width - wallWidth, 0, wallWidth, height); // 右牆
+
       // 背景駐波
       ctx.beginPath();
-      for (let x = 0; x < width; x += dx) {
+      for (let x = wallWidth; x < width - wallWidth; x += dx) {
         const y = A * Math.cos(k * x);
         ctx.lineTo(x, height / 2 - y);
       }
@@ -159,7 +166,7 @@
 
       // 計算主波
       const yValues = [];
-      for (let x = 0; x < width; x += dx) {
+      for (let x = wallWidth; x < width - wallWidth; x += dx) {
         const y = A * Math.sin(k * x - w * time) + A * Math.sin(k * x + w * time);
         yValues.push(y);
       }
@@ -174,7 +181,7 @@
       for (let i = 0; i < trail.length; i++) {
         ctx.beginPath();
         for (let t = 0; t < trail[i].length; t++) {
-          const x = i * dx;
+          const x = wallWidth + i * dx;
           const y = height / 2 - trail[i][t];
           if (t === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
@@ -186,8 +193,9 @@
 
       // 畫主波
       ctx.beginPath();
-      for (let x = 0; x < width; x += dx) {
-        ctx.lineTo(x, height / 2 - yValues[x / dx]);
+      for (let i = 0; i < yValues.length; i++) {
+        const x = wallWidth + i * dx;
+        ctx.lineTo(x, height / 2 - yValues[i]);
       }
       ctx.strokeStyle = '#00ffff';
       ctx.lineWidth = 2;
