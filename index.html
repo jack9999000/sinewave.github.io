@@ -13,7 +13,6 @@
     .slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%; background:#fff; border:2px solid #00ffff; box-shadow:0 0 10px #00ffff; cursor:grab; transition:transform 0.2s; }
     .slider::-webkit-slider-thumb:active { transform:scale(1.2); cursor:grabbing; }
     .value { font-weight:bold; color:#0ff; margin-left:5px; }
-    .hint { font-size:12px; color:#0ff; margin-top:4px; text-align:right; }
   </style>
 </head>
 <body>
@@ -24,12 +23,12 @@
 
     <label>波長 λ: <span id="lambdaVal" class="value">50</span></label>
     <input type="range" id="lambdaSlider" class="slider" min="10" max="100" step="1" value="50">
-    <div id="modeHint" class="hint"></div>
 
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
     <input type="range" id="speedSlider" class="slider" min="1" max="10" step="1" value="5">
 
     <label>駐波個數 n: <span id="modeVal" class="value">1</span></label>
+    <input type="range" id="modeSlider" class="slider" min="1" max="10" step="1" value="1">
   </div>
 
   <canvas id="waveCanvas" width="900" height="400"></canvas>
@@ -47,12 +46,12 @@
     const ampSlider = document.getElementById('ampSlider');
     const lambdaSlider = document.getElementById('lambdaSlider');
     const speedSlider = document.getElementById('speedSlider');
-    const modeVal = document.getElementById('modeVal');
-    const modeHint = document.getElementById('modeHint');
+    const modeSlider = document.getElementById('modeSlider');
 
     const ampVal = document.getElementById('ampVal');
     const lambdaValEl = document.getElementById('lambdaVal');
     const speedVal = document.getElementById('speedVal');
+    const modeVal = document.getElementById('modeVal');
 
     const L = width - 2*wallWidth;
     const trail = [];
@@ -67,22 +66,10 @@
     function updateParams() {
       A = parseFloat(ampSlider.value);
       lambda_val = parseFloat(lambdaSlider.value);
-      lambda = lambda_val*10;  // 波長 = 10 × sliderValue
+      lambda = lambda_val*10;
       speed = parseFloat(speedSlider.value);
       v = 50*speed;
-
-      // 判斷是否符合完整駐波
-      const nExact = 2*L / lambda;
-      if(Math.abs(nExact - Math.round(nExact)) < 1e-6) {
-        mode = Math.round(nExact);
-        modeHint.textContent = "完整駐波";
-      } else {
-        mode = 0;
-        // 顯示最近完整駐波模式提示
-        const nearestN = Math.round(nExact);
-        const nearestLambda = 2*L / nearestN;
-        modeHint.textContent = "最近完整駐波模式 n=" + nearestN + " (λ≈" + (nearestLambda/10).toFixed(1) + ")";
-      }
+      mode = parseInt(modeSlider.value);
 
       ampVal.textContent = A;
       lambdaValEl.textContent = lambda_val.toFixed(0);
@@ -95,6 +82,7 @@
     ampSlider.addEventListener('input',updateParams);
     lambdaSlider.addEventListener('input',updateParams);
     speedSlider.addEventListener('input',updateParams);
+    modeSlider.addEventListener('input',updateParams);
 
     updateParams();
 
@@ -111,7 +99,7 @@
 
       const yValues = [];
       for(let x=0;x<L;x+=dx){
-        // 左右牆反射波疊加
+        // 任意波長波型 + 左右牆反射
         const y = A * Math.sin(k*x - w*time) + A * Math.sin(k*(2*L - x) - w*time);
         yValues.push(y);
       }
@@ -145,6 +133,20 @@
       ctx.strokeStyle='#00ffff';
       ctx.lineWidth=2;
       ctx.stroke();
+
+      // 畫理論駐波節點（由 modeSlider 控制）
+      if(mode > 0){
+        const step = L/mode;
+        ctx.strokeStyle='rgba(255,255,0,0.5)';
+        ctx.lineWidth=1;
+        for(let i=0;i<=mode;i++){
+          const x = wallWidth + i*step;
+          ctx.beginPath();
+          ctx.moveTo(x,0);
+          ctx.lineTo(x,height);
+          ctx.stroke();
+        }
+      }
 
       time += 0.02;
       requestAnimationFrame(draw);
