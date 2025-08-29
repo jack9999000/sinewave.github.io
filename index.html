@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>駐波模擬（完整波長顯示）</title>
+  <title>駐波實驗</title>
   <style>
     body { background-color:#111; color:#eee; text-align:center; margin:0; overflow:hidden; font-family:sans-serif; }
     h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h2>駐波模擬（完整波長顯示）</h2>
+  <h2>駐波實驗</h2>
   <div class="controls">
     <label>振幅 A: <span id="ampVal" class="value">30</span></label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
@@ -64,7 +64,7 @@
     function updateParams() {
       A = parseFloat(ampSlider.value);
       lambda_val = parseFloat(lambdaSlider.value);
-      lambda = lambda_val*10;  // 波長 = 10 * sliderValue
+      lambda = lambda_val*10;  // 波長 = 10 × sliderValue
       speed = parseFloat(speedSlider.value);
       v = 50*speed;
 
@@ -103,8 +103,8 @@
 
       const yValues = [];
       for(let x=0;x<L;x+=dx){
-        // 兩個反向行進波疊加
-        const y = A * Math.sin(k*x - w*time) + A * Math.sin(k*x + w*time);
+        // 左右牆反射波疊加
+        const y = A * Math.sin(k*x - w*time) + A * Math.sin(k*(2*L - x) - w*time);
         yValues.push(y);
       }
 
