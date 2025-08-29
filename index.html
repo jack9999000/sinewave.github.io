@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>駐波模擬（駐波個數 & 波長）</title>
+  <title>駐波模擬（駐波個數 & 波長×10m）</title>
   <style>
     body { background-color:#111; color:#eee; text-align:center; margin:0; overflow:hidden; font-family:sans-serif; }
     h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; }
@@ -16,12 +16,12 @@
   </style>
 </head>
 <body>
-  <h2>駐波模擬（駐波個數 & 波長）</h2>
+  <h2>駐波模擬（駐波個數 & 波長×10 m）</h2>
   <div class="controls">
     <label>振幅 A: <span id="ampVal" class="value">30</span></label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
 
-    <label>波長 λ: <span id="lambdaVal" class="value">10</span></label>
+    <label>波長 λ: <span id="lambdaVal" class="value">50</span></label>
     <input type="range" id="lambdaSlider" class="slider" min="10" max="100" step="1" value="50">
 
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
@@ -40,7 +40,7 @@
     const height = canvas.height;
 
     let time = 0;
-    let A = 30, lambda_val = 50, lambda = lambda_val/1000, speed = 5, v = 50*speed, mode = 1;
+    let A = 30, lambda_val = 50, lambda = lambda_val*10, speed = 5, v = 50*speed, mode = 1;
     const dx = 2, wallWidth = 10;
 
     const ampSlider = document.getElementById('ampSlider');
@@ -70,12 +70,12 @@
 
       if(source === 'mode') {
         mode = parseInt(modeSlider.value);
-        lambda = L / mode;
-        lambda_val = lambda*1000; // 對應滑桿值
+        lambda = L / mode;  // 自動計算畫布單位波長
+        lambda_val = lambda / 10; // 對應滑桿值
         lambdaSlider.value = lambda_val;
       } else if(source === 'lambda') {
         lambda_val = parseFloat(lambdaSlider.value);
-        lambda = lambda_val/1000;
+        lambda = lambda_val * 10; // 波長 = 10 × sliderValue m
         mode = Math.round(L / lambda);
         modeSlider.value = mode;
       }
