@@ -7,9 +7,9 @@
     body { background-color:#111; color:#eee; text-align:center; margin:0; overflow:hidden; font-family:sans-serif; }
     h2 { margin-top:10px; font-weight:600; color:#00ffff; text-shadow:0 0 10px #0ff; }
     canvas { display:block; margin:0 auto; background-color:#222; box-shadow:0 0 15px #000; border-radius:8px; }
-    .controls { position:absolute; top:20px; left:20px; background-color:rgba(0,0,0,0.7); padding:15px; border-radius:12px; box-shadow:0 0 12px #000; text-align:left; width:320px; }
+    .controls { position:absolute; top:20px; left:20px; background-color:rgba(0,0,0,0.7); padding:15px; border-radius:12px; box-shadow:0 0 12px #000; text-align:left; width:220px; }
     .controls label { display:flex; justify-content:space-between; margin-top:12px; font-size:14px; }
-    .slider { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:4px; background:linear-gradient(90deg,#00ffff,#0077ff); outline:none; cursor:pointer; margin-top:4px; transition:background 0.3s; }
+    .slider { -webkit-appearance:none; appearance:none; width:180px; height:6px; border-radius:4px; background:linear-gradient(90deg,#00ffff,#0077ff); outline:none; cursor:pointer; margin-top:4px; transition:background 0.3s; }
     .slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%; background:#fff; border:2px solid #00ffff; box-shadow:0 0 10px #00ffff; cursor:grab; transition:transform 0.2s; }
     .slider::-webkit-slider-thumb:active { transform:scale(1.2); cursor:grabbing; }
     .value { font-weight:bold; color:#0ff; margin-left:5px; }
@@ -18,11 +18,11 @@
 <body>
   <h2>駐波模擬（駐波個數 & 波長）</h2>
   <div class="controls">
-    <label>振幅 A: <span id="ampVal" class="value">30</span> px</label>
+    <label>振幅 A: <span id="ampVal" class="value">30</span></label>
     <input type="range" id="ampSlider" class="slider" min="5" max="50" value="30">
 
-    <label>波長 λ: <span id="lambdaVal" class="value">5.00</span> cm</label>
-    <input type="range" id="lambdaSlider" class="slider" min="1" max="10" step="0.01" value="5">
+    <label>波長 λ: <span id="lambdaVal" class="value">10</span></label>
+    <input type="range" id="lambdaSlider" class="slider" min="10" max="100" step="1" value="50">
 
     <label>播放速度: <span id="speedVal" class="value">5</span></label>
     <input type="range" id="speedSlider" class="slider" min="1" max="10" step="1" value="5">
@@ -40,7 +40,7 @@
     const height = canvas.height;
 
     let time = 0;
-    let A = 30, lambda_cm = 5, lambda = lambda_cm/100, speed = 5, v = 50*speed, mode = 1;
+    let A = 30, lambda_val = 50, lambda = lambda_val/1000, speed = 5, v = 50*speed, mode = 1;
     const dx = 2, wallWidth = 10;
 
     const ampSlider = document.getElementById('ampSlider');
@@ -49,7 +49,7 @@
     const modeSlider = document.getElementById('modeSlider');
 
     const ampVal = document.getElementById('ampVal');
-    const lambdaVal = document.getElementById('lambdaVal');
+    const lambdaValEl = document.getElementById('lambdaVal');
     const speedVal = document.getElementById('speedVal');
     const modeVal = document.getElementById('modeVal');
 
@@ -70,18 +70,18 @@
 
       if(source === 'mode') {
         mode = parseInt(modeSlider.value);
-        lambda = L / mode;  // 自動計算波長
-        lambda_cm = lambda*100;
-        lambdaSlider.value = lambda_cm.toFixed(2);
+        lambda = L / mode;
+        lambda_val = lambda*1000; // 對應滑桿值
+        lambdaSlider.value = lambda_val;
       } else if(source === 'lambda') {
-        lambda_cm = parseFloat(lambdaSlider.value);
-        lambda = lambda_cm/100;
-        mode = Math.round(L / lambda); // 計算駐波個數
+        lambda_val = parseFloat(lambdaSlider.value);
+        lambda = lambda_val/1000;
+        mode = Math.round(L / lambda);
         modeSlider.value = mode;
       }
 
       ampVal.textContent = A;
-      lambdaVal.textContent = lambda_cm.toFixed(2);
+      lambdaValEl.textContent = lambda_val.toFixed(0);
       speedVal.textContent = speed;
       modeVal.textContent = mode;
 
@@ -93,7 +93,7 @@
     modeSlider.addEventListener('input',()=>updateParams('mode'));
     lambdaSlider.addEventListener('input',()=>updateParams('lambda'));
 
-    updateParams('amp'); // 初始化
+    updateParams('amp');
 
     function draw() {
       ctx.clearRect(0,0,width,height);
