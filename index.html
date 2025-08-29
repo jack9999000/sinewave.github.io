@@ -15,52 +15,92 @@
 
     h2 {
       margin-top: 10px;
+      font-weight: 600;
+      color: #00ffff;
+      text-shadow: 0 0 10px #0ff;
     }
 
     canvas {
       display: block;
       margin: 0 auto;
       background-color: #222;
+      box-shadow: 0 0 15px #000;
+      border-radius: 8px;
     }
 
     /* 控制面板 */
     .controls {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 12px;
-      border-radius: 8px;
-      box-shadow: 0 0 8px #000;
+      top: 20px;
+      left: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px #000;
       text-align: left;
+      width: 220px;
     }
 
     .controls label {
-      display: block;
-      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
       font-size: 14px;
     }
 
-    .controls input[type="range"] {
-      width: 150px;
+    /* 自訂滑桿 */
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #00ffff, #0077ff);
+      outline: none;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.3s;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #00ffff;
+      box-shadow: 0 0 10px #00ffff;
+      cursor: grab;
+      transition: transform 0.2s;
+    }
+
+    .slider::-webkit-slider-thumb:active {
+      transform: scale(1.2);
+      cursor: grabbing;
+    }
+
+    .value {
+      font-weight: bold;
+      color: #0ff;
+      margin-left: 5px;
     }
   </style>
 </head>
 <body>
   <h2>駐波模擬</h2>
   <div class="controls">
-    <label>振幅 A: <span id="ampVal">80</span>
-      <input type="range" id="ampSlider" min="10" max="150" value="80">
-    </label>
-    <label>波長 λ: <span id="lambdaVal">100</span>
-      <input type="range" id="lambdaSlider" min="50" max="300" value="100">
-    </label>
-    <label>角頻率 ω: <span id="omegaVal">100</span>
-      <input type="range" id="omegaSlider" min="20" max="300" value="100">
-    </label>
-    <label>播放速度: <span id="speedVal">0.05</span>
-      <input type="range" id="speedSlider" min="0.01" max="0.2" step="0.01" value="0.05">
-    </label>
+    <label>振幅 A: <span id="ampVal" class="value">80</span></label>
+    <input type="range" id="ampSlider" class="slider" min="10" max="150" value="80">
+
+    <label>波長 λ: <span id="lambdaVal" class="value">100</span></label>
+    <input type="range" id="lambdaSlider" class="slider" min="50" max="300" value="100">
+
+    <label>角頻率 ω: <span id="omegaVal" class="value">100</span></label>
+    <input type="range" id="omegaSlider" class="slider" min="20" max="300" value="100">
+
+    <label>播放速度: <span id="speedVal" class="value">0.05</span></label>
+    <input type="range" id="speedSlider" class="slider" min="0.01" max="0.2" step="0.01" value="0.05">
   </div>
 
   <canvas id="waveCanvas" width="900" height="400"></canvas>
@@ -68,11 +108,9 @@
   <script>
     const canvas = document.getElementById('waveCanvas');
     const ctx = canvas.getContext('2d');
-
     const width = canvas.width;
     const height = canvas.height;
 
-    // 初始參數
     let time = 0;
     let A = 80;
     let lambda = 100;
@@ -80,7 +118,6 @@
     let speed = 0.05;
     const dx = 2;
 
-    // 連動滑桿
     const ampSlider = document.getElementById('ampSlider');
     const lambdaSlider = document.getElementById('lambdaSlider');
     const omegaSlider = document.getElementById('omegaSlider');
@@ -91,43 +128,39 @@
     const omegaVal = document.getElementById('omegaVal');
     const speedVal = document.getElementById('speedVal');
 
-    ampSlider.addEventListener('input', () => {
+    function updateParams() {
       A = parseFloat(ampSlider.value);
-      ampVal.textContent = A;
-    });
-
-    lambdaSlider.addEventListener('input', () => {
       lambda = parseFloat(lambdaSlider.value);
-      lambdaVal.textContent = lambda;
-    });
-
-    omegaSlider.addEventListener('input', () => {
       omega = parseFloat(omegaSlider.value);
-      omegaVal.textContent = omega;
-    });
-
-    speedSlider.addEventListener('input', () => {
       speed = parseFloat(speedSlider.value);
+
+      ampVal.textContent = A;
+      lambdaVal.textContent = lambda;
+      omegaVal.textContent = omega;
       speedVal.textContent = speed.toFixed(2);
+    }
+
+    [ampSlider, lambdaSlider, omegaSlider, speedSlider].forEach(slider => {
+      slider.addEventListener('input', updateParams);
     });
 
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      const k = 2 * Math.PI / lambda;   // 波數
-      const w = 2 * Math.PI / omega;    // 角頻率
+      const k = 2 * Math.PI / lambda;
+      const w = 2 * Math.PI / omega;
 
-      // 繪製背景淡淡的駐波
+      // 淡淡的背景駐波
       ctx.beginPath();
       for (let x = 0; x < width; x += dx) {
-        const y = A * Math.cos(k * x); // 駐波波峰
+        const y = A * Math.cos(k * x);
         ctx.lineTo(x, height / 2 - y);
       }
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // 繪製主駐波動畫
+      // 主動畫
       ctx.beginPath();
       for (let x = 0; x < width; x += dx) {
         const y = A * Math.sin(k * x - w * time) + A * Math.sin(k * x + w * time);
@@ -137,7 +170,6 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // 更新時間
       time += speed;
       requestAnimationFrame(draw);
     }
