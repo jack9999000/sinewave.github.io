@@ -49,18 +49,6 @@
     const modeVal = document.getElementById('modeVal');
 
     const L = width - 2*wallWidth;
-    const trail = [];
-    const maxTrailLength = 200;
-
-    ampSlider.addEventListener('input', updateParams);
-    speedSlider.addEventListener('input', updateParams);
-    modeSlider.addEventListener('input', updateParams);
-
-    function rebuildTrail() {
-      trail.length = 0;
-      const len = Math.floor(L/dx);
-      for(let i=0;i<len;i++) trail.push([]);
-    }
 
     function updateParams() {
       A = parseFloat(ampSlider.value);
@@ -71,15 +59,17 @@
       ampVal.textContent = A;
       speedVal.textContent = speed;
       modeVal.textContent = mode;
-
-      rebuildTrail();
     }
+
+    ampSlider.addEventListener('input', updateParams);
+    speedSlider.addEventListener('input', updateParams);
+    modeSlider.addEventListener('input', updateParams);
 
     updateParams();
 
     function draw() {
-      // 在畫布上加半透明黑色來淡化舊軌跡
-      ctx.fillStyle = "rgba(34,34,34,0.3)";
+      // 用透明度填充整個畫布，使軌跡會漸淡消失
+      ctx.fillStyle = "rgba(34,34,34,0.2)";
       ctx.fillRect(0,0,width,height);
 
       // 畫牆
@@ -90,45 +80,20 @@
       const k = Math.PI * mode / L;
       const w = v * k;
 
-      const yValues = [];
-      for(let x=0;x<L;x+=dx){
-        const y = 2*A * Math.sin(k*x) * Math.cos(w*time);
-        yValues.push(y);
-      }
-
-      // 更新軌跡
-      for(let i=0;i<yValues.length;i++){
-        trail[i].push(yValues[i]);
-        if(trail[i].length>maxTrailLength) trail[i].shift();
-      }
-
-      // 畫軌跡（用 globalAlpha 漸淡）
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = '#ff00ff';
-      ctx.beginPath();
-      for(let i=0;i<trail.length;i++){
-        for(let j=0;j<trail[i].length;j++){
-          const x = wallWidth + i*dx;
-          const y = height/2 - trail[i][j];
-          if(j===0) ctx.moveTo(x,y);
-          else ctx.lineTo(x,y);
-        }
-      }
-      ctx.globalAlpha = 0.3;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-
       // 畫主波
       ctx.beginPath();
-      for(let i=0;i<yValues.length;i++){
-        const x = wallWidth + i*dx;
-        ctx.lineTo(x,height/2 - yValues[i]);
+      for(let x=0;x<L;x+=dx){
+        const y = 2*A * Math.sin(k*x) * Math.cos(w*time);
+        const px = wallWidth + x;
+        const py = height/2 - y;
+        if(x===0) ctx.moveTo(px,py);
+        else ctx.lineTo(px,py);
       }
       ctx.strokeStyle='#00ffff';
       ctx.lineWidth=2;
       ctx.stroke();
 
-      // 畫駐波節點
+      // 畫理論駐波節點
       if(mode > 0){
         const step = L/mode;
         ctx.strokeStyle='rgba(255,255,0,0.5)';
@@ -142,7 +107,7 @@
         }
       }
 
-      time += 0.15;
+      time += 0.15; // 加快播放速度
       requestAnimationFrame(draw);
     }
 
