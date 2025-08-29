@@ -12,15 +12,57 @@
       overflow: hidden;
       font-family: sans-serif;
     }
+
+    h2 {
+      margin-top: 10px;
+    }
+
     canvas {
       display: block;
       margin: 0 auto;
       background-color: #222;
     }
+
+    /* 控制面板 */
+    .controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px #000;
+      text-align: left;
+    }
+
+    .controls label {
+      display: block;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    .controls input[type="range"] {
+      width: 150px;
+    }
   </style>
 </head>
 <body>
   <h2>駐波模擬</h2>
+  <div class="controls">
+    <label>振幅 A: <span id="ampVal">80</span>
+      <input type="range" id="ampSlider" min="10" max="150" value="80">
+    </label>
+    <label>波長 λ: <span id="lambdaVal">100</span>
+      <input type="range" id="lambdaSlider" min="50" max="300" value="100">
+    </label>
+    <label>角頻率 ω: <span id="omegaVal">100</span>
+      <input type="range" id="omegaSlider" min="20" max="300" value="100">
+    </label>
+    <label>播放速度: <span id="speedVal">0.05</span>
+      <input type="range" id="speedSlider" min="0.01" max="0.2" step="0.01" value="0.05">
+    </label>
+  </div>
+
   <canvas id="waveCanvas" width="900" height="400"></canvas>
 
   <script>
@@ -30,28 +72,73 @@
     const width = canvas.width;
     const height = canvas.height;
 
+    // 初始參數
     let time = 0;
-    const A = 80; // 振幅
-    const k = 2 * Math.PI / 100; // 波數
-    const w = 2 * Math.PI / 100; // 角頻率
+    let A = 80;
+    let lambda = 100;
+    let omega = 100;
+    let speed = 0.05;
     const dx = 2;
+
+    // 連動滑桿
+    const ampSlider = document.getElementById('ampSlider');
+    const lambdaSlider = document.getElementById('lambdaSlider');
+    const omegaSlider = document.getElementById('omegaSlider');
+    const speedSlider = document.getElementById('speedSlider');
+
+    const ampVal = document.getElementById('ampVal');
+    const lambdaVal = document.getElementById('lambdaVal');
+    const omegaVal = document.getElementById('omegaVal');
+    const speedVal = document.getElementById('speedVal');
+
+    ampSlider.addEventListener('input', () => {
+      A = parseFloat(ampSlider.value);
+      ampVal.textContent = A;
+    });
+
+    lambdaSlider.addEventListener('input', () => {
+      lambda = parseFloat(lambdaSlider.value);
+      lambdaVal.textContent = lambda;
+    });
+
+    omegaSlider.addEventListener('input', () => {
+      omega = parseFloat(omegaSlider.value);
+      omegaVal.textContent = omega;
+    });
+
+    speedSlider.addEventListener('input', () => {
+      speed = parseFloat(speedSlider.value);
+      speedVal.textContent = speed.toFixed(2);
+    });
 
     function draw() {
       ctx.clearRect(0, 0, width, height);
 
-      ctx.beginPath();
-      ctx.moveTo(0, height / 2);
+      const k = 2 * Math.PI / lambda;   // 波數
+      const w = 2 * Math.PI / omega;    // 角頻率
 
+      // 繪製背景淡淡的駐波
+      ctx.beginPath();
       for (let x = 0; x < width; x += dx) {
-        const y = A * Math.sin(k * x - w * time) + A * Math.sin(k * x + w * time); // 合成波 = 正向波 + 反向波
+        const y = A * Math.cos(k * x); // 駐波波峰
         ctx.lineTo(x, height / 2 - y);
       }
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
+      // 繪製主駐波動畫
+      ctx.beginPath();
+      for (let x = 0; x < width; x += dx) {
+        const y = A * Math.sin(k * x - w * time) + A * Math.sin(k * x + w * time);
+        ctx.lineTo(x, height / 2 - y);
+      }
       ctx.strokeStyle = '#00ffff';
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      time += 0.05;
+      // 更新時間
+      time += speed;
       requestAnimationFrame(draw);
     }
 
